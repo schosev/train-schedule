@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+                crossorigin="anonymous">
+            <link href="./assets/css/styles.css" rel="stylesheet">
+            <title>Train Schedule</title>
+            <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        
+    </head>
+
+    <body>
+        <header class="page-header">
+            <h1 class="text-center">Train Schedule</h1>
+        </header>
+        
+        <main role="main" class="container-fluid">
+            <div class="panel-wrapper" id="top-panel">
+                <div class="panel panel-success">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Current Train Schedule</div>
+                    
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tr>
+                                <th>Train Name</th>
+                                <th>Destination</th>
+                                <th>Frequency (min)</th>
+                                <th>Next Arrival</th>
+                                <th>Minutes Away</th>
+                            </tr>
+                            <!--<tr>  example for styling purposes
+                                <td>Denver Express</td>
+                                <td>Denver</td>
+                                <td>60</td>
+                                <td>1:35</td>
+                                <td>25</td>
+                            </tr>-->
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-wrapper">
+                <div class="panel panel-success">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Add Train</div>
+                    <form id="train-form">
+                        <div class="form-group">
+                            <label for="train-name" class="labelClass">Train Name</label>
+                            <br />
+                            <input type="text" class="form-control" name="train-name" id="train-name"  />
+                            <br />
+                        </div>
+                        <div class="form-group">
+                            <label for="destination" class="labelClass">Destination</label>
+                            <br />
+                            <input type="text" class="form-control" name="destination" id="destination"  />
+                            <br />
+                        </div>
+                        <div class="form-group">
+                            <label for="train-time" class="labelClass">First Train Time (HH:mm Military Time)</label>
+                            <br />
+                            <input type="text" class="form-control" name="train-time" id="train-time"  />
+                            <br />
+                        </div>
+                        <div class="form-group">
+                            <label for="frequency" class="labelClass">Frequency (min)</label>
+                            <br />
+                            <input type="text" class="form-control" name="frequency" id="frequency"  />
+                            <br />
+                        </div>
+                        <input type="button" class="btn btn-success btn-lg" id="submit-button" value="Submit" />
+                    </form>
+                </div>
+            </div>
+
+        </main>
+        <script src="assets/javascript/train.js" type="text/javascript"></script>
+    </body>
+</html>
