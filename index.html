@@ -8,6 +8,8 @@
             <link href="./assets/css/styles.css" rel="stylesheet">
             <title>Train Schedule</title>
             <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
         
     </head>
 
@@ -64,13 +66,16 @@
                         <div class="form-group">
                             <label for="train-time" class="labelClass">First Train Time (HH:mm Military Time)</label>
                             <br />
-                            <input type="text" class="form-control" name="train-time" id="train-time"  />
+                            <!---<input type="text" class="form-control" name="train-time" id="train-time" />-->
+                            <input type="number" min="0" max="24" class="form-control train-time" name="train-time-hour" id="train-time-hour" />
+                            :
+                            <input type="number" min="0" max="59" class="form-control train-time" name="train-time-min" id="train-time-min" />
                             <br />
                         </div>
                         <div class="form-group">
                             <label for="frequency" class="labelClass">Frequency (min)</label>
                             <br />
-                            <input type="text" class="form-control" name="frequency" id="frequency"  />
+                            <input type="number" class="form-control" name="frequency" id="frequency"  />
                             <br />
                         </div>
                         <input type="button" class="btn btn-success btn-lg" id="submit-button" value="Submit" />

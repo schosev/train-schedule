@@ -23,6 +23,11 @@ body {
     margin-top: 15px;
 }
 
+.train-time {
+    width: 75px;
+    display: inline-block;
+}
+
 .form-group {
     margin: 0px 15px 0px 15px;
 }

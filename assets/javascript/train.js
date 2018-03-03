@@ -1,65 +1,166 @@
 $(document).ready(function() {
 
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyCUI-aQG9C9NOUWsPRcSTVFcVX82A08Y7g",
+        authDomain: "joseph-firebase-project.firebaseapp.com",
+        databaseURL: "https://joseph-firebase-project.firebaseio.com",
+        projectId: "joseph-firebase-project",
+        storageBucket: "joseph-firebase-project.appspot.com",
+        messagingSenderId: "513762594275"
+    };
+    firebase.initializeApp(config);
+
+    // Create a variable to reference the database.
+    var database = firebase.database();
+
+    var initialLoad = true;
+
     function getValues() {
 
         var trainName = $("#train-name").val().trim();
         var trainDest = $("#destination").val().trim();
-        var trainTime = $("#train-time").val().trim();
+        var trainTimeHour = $("#train-time-hour").val().trim();
+        var trainTimeMin = $("#train-time-min").val().trim();
         var trainFreq = $("#frequency").val().trim();
 
-        calcMinAway(trainTime, trainFreq);
+        if (trainTimeHour > 24 || trainTimeHour < 0) {
+            alert("Hours have to be between 0 and 24");
+            return
+        }
+         else if (trainTimeMin > 59 || trainTimeMin < 0) {
+            alert("Minutes have to be between 0 and 59");
+            return
+        }else if (trainFreq <= 0) {
+            alert("Train Frequency has to be greater than 0");
+            return
+        }
 
-        var tableInfo = $("<tr>")
-        tableInfo.append("<td>" + trainName + "</td>")
-        tableInfo.append("<td>" + trainDest + "</td>")
-        tableInfo.append("<td>" + trainFreq + "</td>")
+        // var tableInfo = $("<tr>")
+        // tableInfo.append("<td>" + trainName + "</td>")
+        // tableInfo.append("<td>" + trainDest + "</td>")
+        // tableInfo.append("<td>" + trainFreq + "</td>")
 
-        $(".table").append(tableInfo);
+        var firstTime = (trainTimeHour + ":" + trainTimeMin);
+
+        var minsAway = calcMinAway(firstTime, trainFreq);
+        var nextArrival = calcNextArrival(minsAway);
+
+        // tableInfo.append("<td>" + nextArrival + "</td>")
+        // tableInfo.append("<td>" + minsAway + "</td>")
+
+        // $(".table").append(tableInfo);
+
+        database.ref().push ({
+            name: trainName,
+            destination: trainDest,
+            freq: trainFreq,
+            arrival: nextArrival,
+            minAway: minsAway,
+            dateAdded: firebase.database.ServerValue.TIMESTAMP
+        })
+
+        $("#train-name").val("");
+        $("#destination").val("");
+        $("#train-time-hour").val("");
+        $("#train-time-min").val("");
+        $("#frequency").val("");
 
     }
 
-    function calcMinAway(tTime, tFreq) {
-        //get current time
-        var dt = new Date();
-        //var cTime = dt.getHours() + ":" + dt.getMinutes();
+    function calcMinAway(tFirstTime, tFreq) {
 
-        console.log("first time: " + tTime);
-        console.log("freq " + tFreq);
+        // First Time (pushed back 1 year to make sure it comes before current time)
+        var firstTimeConverted = moment(tFirstTime, "HH:mm").subtract(1, "years");
+        console.log(firstTimeConverted);
 
-        //convert first time entered to total number of minutes
-        var tTimeHour = parseInt(tTime.substr(0, 2));
-        var tTimeMin = parseInt(tTime.substr(3, 2));
-        var tTimeTotalMin = (tTimeHour * 60) + tTimeMin;
+        // Current Time
+        var currentTime = moment();
+        console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
 
-        //convert current time to total number of minutes
-        var cTimeTotalMin = (dt.getHours() * 60) + dt.getMinutes();
+        // Difference between the times
+        var timeDiff = moment().diff(moment(firstTimeConverted), "minutes");
+        console.log("DIFFERENCE IN TIME: " + timeDiff);
 
-        //calculate how far away the train is and the arrival time
-        var timeDiff = cTimeTotalMin - tTimeTotalMin;
-        var divideTotal = (timeDiff / tFreq);
-        var remainder = (divideTotal % 1).toFixed(10);
-        var minFrac = Math.floor(remainder * tFreq);
-        var farAway = tFreq - minFrac;  //this is how many minutes away the train is
-        console.log("farAway " + farAway);
-        var totalMinArrive = cTimeTotalMin + farAway;
-        var arriveTimeFrac = totalMinArrive / 60;
-        var arriveTimeRemainder = (arriveTimeFrac % 1).toFixed(10);
-        var arriveTimeMin = Math.floor(arriveTimeRemainder * 60);  //check that minutes are rounded correctly
-        var arriveTimeHour = Math.floor(arriveTimeFrac);
-        var arrivalTime = arriveTimeHour + ":" + arriveTimeMin;  // this is the next arrival time
-        console.log("arrivalTime " + arrivalTime);
+        // Time apart (remainder)
+        var tRemainder = timeDiff % tFreq;
+        console.log(tRemainder);
 
-
-
-        
+        // Minute Until Train
+        var farAway = tFreq - tRemainder;
+        console.log("MINUTES TILL TRAIN: " + farAway);
+        return farAway;
     }
 
-    $("#submit-button").on("click", function() {
+    function calcNextArrival (howFarAway) {
+
+        // Next Train
+        var nextTrain = moment().add(howFarAway, "minutes");
+        console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+        return moment(nextTrain).format("hh:mm a");
+                
+    }
+
+    // function addTableRow (lv) {
+    //     var tableInfo = $("<tr>")
+    //         tableInfo.append("<td>" + lv.name + "</td>")
+    //         tableInfo.append("<td>" + lv.destination + "</td>")
+    //         tableInfo.append("<td>" + lv.freq + "</td>")
+    //         tableInfo.append("<td>" + lv.arrival + "</td>")
+    //         tableInfo.append("<td>" + lv.minAway + "</td>")
+
+    //         $(".table").append(tableInfo);
+    //}
+
+    $("#submit-button").on("click", function(event) {
         event.preventDefault();
 
         getValues();
 
     }) 
 
+    if (initialLoad) {
+        database.ref().orderByChild("dateAdded").on("child_added", function(snapshot) {
+            console.log("inital load");
+            var lv = snapshot.val();
+            console.log(lv.name);
+
+            var tableInfo = $("<tr>");
+            tableInfo.append("<td>" + lv.name + "</td>");
+            tableInfo.append("<td>" + lv.destination + "</td>");
+            tableInfo.append("<td>" + lv.freq + "</td>");
+            tableInfo.append("<td>" + lv.arrival + "</td>");
+            tableInfo.append("<td>" + lv.minAway + "</td>");
+
+            $(".table").append(tableInfo);
+            //addTableRow (lv1);
+            initialLoad = false;
+    
+            // Handle the errors
+        }, function(errorObject) {
+            console.log("Errors handled: " + errorObject.code);
+        });
+    }
+     else {
+         database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
+            // storing the snapshot.val() in a variable for convenience
+            var sv = snapshot.val();
+            
+            var tableInfo = $("<tr>")
+            tableInfo.append("<td>" + sv.name + "</td>")
+            tableInfo.append("<td>" + sv.destination + "</td>")
+            tableInfo.append("<td>" + sv.freq + "</td>")
+            tableInfo.append("<td>" + sv.arrival + "</td>")
+            tableInfo.append("<td>" + sv.minAway + "</td>")
+
+            $(".table").append(tableInfo);
+
+            //addTableRow ();
+
+            // Handle the errors
+        }, function(errorObject) {
+            console.log("Errors handled: " + errorObject.code);
+        });
+    }
     
 });
