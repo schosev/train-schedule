@@ -36,20 +36,10 @@ $(document).ready(function() {
             return
         }
 
-        // var tableInfo = $("<tr>")
-        // tableInfo.append("<td>" + trainName + "</td>")
-        // tableInfo.append("<td>" + trainDest + "</td>")
-        // tableInfo.append("<td>" + trainFreq + "</td>")
-
         var firstTime = (trainTimeHour + ":" + trainTimeMin);
 
         var minsAway = calcMinAway(firstTime, trainFreq);
         var nextArrival = calcNextArrival(minsAway);
-
-        // tableInfo.append("<td>" + nextArrival + "</td>")
-        // tableInfo.append("<td>" + minsAway + "</td>")
-
-        // $(".table").append(tableInfo);
 
         database.ref().push ({
             name: trainName,
@@ -72,45 +62,28 @@ $(document).ready(function() {
 
         // First Time (pushed back 1 year to make sure it comes before current time)
         var firstTimeConverted = moment(tFirstTime, "HH:mm").subtract(1, "years");
-        console.log(firstTimeConverted);
 
         // Current Time
         var currentTime = moment();
-        console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
 
         // Difference between the times
         var timeDiff = moment().diff(moment(firstTimeConverted), "minutes");
-        console.log("DIFFERENCE IN TIME: " + timeDiff);
 
         // Time apart (remainder)
         var tRemainder = timeDiff % tFreq;
-        console.log(tRemainder);
 
         // Minute Until Train
         var farAway = tFreq - tRemainder;
-        console.log("MINUTES TILL TRAIN: " + farAway);
         return farAway;
     }
 
     function calcNextArrival (howFarAway) {
 
         // Next Train
-        var nextTrain = moment().add(howFarAway, "minutes");
-        console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+        var nextTrain = moment().add(howFarAway, "minutes");;
         return moment(nextTrain).format("hh:mm a");
                 
     }
-
-    // function addTableRow (lv) {
-    //     var tableInfo = $("<tr>")
-    //         tableInfo.append("<td>" + lv.name + "</td>")
-    //         tableInfo.append("<td>" + lv.destination + "</td>")
-    //         tableInfo.append("<td>" + lv.freq + "</td>")
-    //         tableInfo.append("<td>" + lv.arrival + "</td>")
-    //         tableInfo.append("<td>" + lv.minAway + "</td>")
-
-    //         $(".table").append(tableInfo);
-    //}
 
     $("#submit-button").on("click", function(event) {
         event.preventDefault();
@@ -121,11 +94,11 @@ $(document).ready(function() {
 
     if (initialLoad) {
         database.ref().orderByChild("dateAdded").on("child_added", function(snapshot) {
-            console.log("inital load");
             var lv = snapshot.val();
-            console.log(lv.name);
 
             var tableInfo = $("<tr>");
+            tableInfo.addClass("train-row");
+            tableInfo.attr("data-id", lv.dateAdded);
             tableInfo.append("<td>" + lv.name + "</td>");
             tableInfo.append("<td>" + lv.destination + "</td>");
             tableInfo.append("<td>" + lv.freq + "</td>");
@@ -133,7 +106,6 @@ $(document).ready(function() {
             tableInfo.append("<td>" + lv.minAway + "</td>");
 
             $(".table").append(tableInfo);
-            //addTableRow (lv1);
             initialLoad = false;
     
             // Handle the errors
@@ -147,6 +119,8 @@ $(document).ready(function() {
             var sv = snapshot.val();
             
             var tableInfo = $("<tr>")
+            tableInfo.addClass("train-row");
+            tableInfo.attr("data-id", lv.dateAdded);
             tableInfo.append("<td>" + sv.name + "</td>")
             tableInfo.append("<td>" + sv.destination + "</td>")
             tableInfo.append("<td>" + sv.freq + "</td>")
@@ -154,8 +128,6 @@ $(document).ready(function() {
             tableInfo.append("<td>" + sv.minAway + "</td>")
 
             $(".table").append(tableInfo);
-
-            //addTableRow ();
 
             // Handle the errors
         }, function(errorObject) {
